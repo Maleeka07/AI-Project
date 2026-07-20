@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+
+{% block title %}Manage Movies — MovieAI Admin{% endblock %}
+
+{% block content %}
+<div class="container">
+    <section class="section">
+        <div class="page-header">
+            <h1 class="page-title">Manage Movies</h1>
+            <a href="{{ url_for('admin.add_movie') }}" class="btn btn-accent">➕ Add New Movie</a>
+        </div>
+
+        {% if movies and movies|length > 0 %}
+        <div class="table-wrapper">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Title</th>
+                        <th>Genre</th>
+                        <th>Rating</th>
+                        <th>Director</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for movie in movies %}
+                    <tr>
+                        <td>{{ loop.index }}</td>
+                        <td class="td-title">{{ movie.title }}</td>
+                        <td>{{ movie.genres | join(', ') if movie.genres else '-' }}</td>
+                        <td>⭐ {{ movie.rating }}</td>
+                        <td>{{ movie.director or '-' }}</td>
+                        <td class="td-actions">
+                            <a href="{{ url_for('admin.edit_movie', movie_id=movie.id) }}" class="btn-sm btn-edit">Edit</a>
+                            <form method="POST" action="{{ url_for('admin.delete_movie', movie_id=movie.id) }}" class="inline-form"
+                                  onsubmit="return confirm('Are you sure you want to delete {{ movie.title }}?')">
+                                <button type="submit" class="btn-sm btn-delete">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <span class="empty-icon">🎬</span>
+            <h3>No movies found</h3>
+            <p>Add some movies to get started.</p>
+            <a href="{{ url_for('admin.add_movie') }}" class="btn btn-accent">Add Your First Movie</a>
+        </div>
+        {% endif %}
+    </section>
+</div>
+{% endblock %}

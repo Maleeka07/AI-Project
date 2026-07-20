@@ -1,0 +1,147 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ movie.title }} — AI Powered Movie Recommendation{% endblock %}
+
+{% block content %}
+<div class="container">
+
+    <!-- Movie Detail Section -->
+    <section class="movie-detail">
+        <div class="movie-detail-poster">
+                {% if movie.poster_path %}
+                    {% if movie.poster_path.startswith('http') %}
+                        <img src="{{ movie.poster_path }}" alt="{{ movie.title }}" class="movie-detail-poster">
+                    {% else %}
+                        <img src="{{ url_for('static', filename=movie.poster_path.replace('static/', '').replace('/static/', '')) }}" alt="{{ movie.title }}" class="movie-detail-poster">
+                    {% endif %}
+                {% else %}
+                    <div class="poster-placeholder large">🎬</div>
+                {% endif %}
+        </div>
+
+        <div class="movie-detail-info">
+            <h1 class="detail-title">{{ movie.title }}</h1>
+
+            <div class="detail-meta">
+                <span class="detail-rating">⭐ {{ movie.rating }}/10</span>
+                {% if movie.release_date %}
+                    <span class="detail-year">📅 {{ movie.release_date[:4] if movie.release_date|length > 4 else movie.release_date }}</span>
+                {% endif %}
+                {% if movie.runtime %}
+                    <span class="detail-runtime">⏱️ {{ movie.runtime }} min</span>
+                {% endif %}
+                {% if movie.language %}
+                    <span class="detail-lang">🌐 {{ movie.language|upper }}</span>
+                {% endif %}
+            </div>
+
+            <!-- Genres -->
+            {% if movie.genres %}
+                <div class="detail-genres">
+                    {% for genre in movie.genres %}
+                        <span class="genre-tag">{{ genre }}</span>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <!-- Overview -->
+            {% if movie.overview %}
+                <div class="detail-overview">
+                    <h3>Overview</h3>
+                    <p>{{ movie.overview }}</p>
+                </div>
+            {% endif %}
+
+            <!-- Director -->
+            {% if movie.director %}
+                <p class="detail-field"><strong>Director:</strong> {{ movie.director }}</p>
+            {% endif %}
+
+            <!-- Production Company -->
+            {% if movie.production_company %}
+                <p class="detail-field"><strong>Production:</strong> {{ movie.production_company }}</p>
+            {% endif %}
+
+            <!-- Cast -->
+            {% if movie.cast %}
+                <p class="detail-field"><strong>Cast:</strong>
+                    {% if movie.cast is string %}
+                        {{ movie.cast }}
+                    {% else %}
+                        {{ movie.cast | join(', ') }}
+                    {% endif %}
+                </p>
+            {% endif %}
+
+            <!-- Action Buttons -->
+            <div class="detail-actions">
+                {% if movie.trailer_link %}
+                    <a href="{{ movie.trailer_link }}" target="_blank" class="btn btn-accent">
+                        ▶ Watch Trailer
+                    </a>
+                {% endif %}
+
+                {% if source == 'local' %}
+                    <button class="btn btn-fav {% if is_favorite %}active{% endif %}" id="favBtn"
+                            data-movie-id="{{ movie.id }}" onclick="toggleFavorite({{ movie.id }})">
+                        <span id="favIcon">{{ '❤️' if is_favorite else '🤍' }}</span> Favorite
+                    </button>
+                {% endif %}
+            </div>
+
+            <!-- Rating Stars -->
+            {% if source == 'local' %}
+            <div class="rating-section">
+                <h3>Rate this movie</h3>
+                <div class="star-rating" id="starRating" data-movie-id="{{ movie.id }}">
+                    {% for i in range(1, 6) %}
+                        <span class="star" data-value="{{ i * 2 }}" onclick="rateMovie({{ movie.id }}, {{ i * 2 }})">☆</span>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </section>
+
+    <!-- Recommendations Section -->
+    {% if recommendations and recommendations|length > 0 %}
+    <section class="section recommendations-section">
+        <h2 class="section-title">You Might Also Like</h2>
+        <div class="movie-grid">
+            {% for rec in recommendations[:8] %}
+                <a href="{{ url_for('main.movie_detail', movie_id=rec.id) }}?source={{ rec.source|default('local') }}" class="movie-card rec-card">
+                    <div class="movie-poster">
+                                {% if rec.poster_path %}
+                                    {% if rec.poster_path.startswith('http') %}
+                                        <img src="{{ rec.poster_path }}" alt="{{ rec.title }}" loading="lazy">
+                                    {% else %}
+                                        <img src="{{ url_for('static', filename=rec.poster_path.replace('static/', '').replace('/static/', '')) }}" alt="{{ rec.title }}" loading="lazy">
+                                    {% endif %}
+                                {% else %}
+                                    <div class="poster-placeholder">🎬</div>
+                                {% endif %}
+                        {% if rec.hybrid_score is defined %}
+                            <div class="match-badge">{{ rec.hybrid_score }}% Match</div>
+                        {% elif rec.similarity is defined %}
+                            <div class="match-badge">{{ rec.similarity }}% Match</div>
+                        {% endif %}
+                    </div>
+                    <div class="movie-info">
+                        <h3 class="movie-title">{{ rec.title }}</h3>
+                        <p class="movie-year">⭐ {{ rec.rating }}</p>
+                        {% if rec.explanation is defined %}
+                            <div class="rec-reasons">
+                                {% for reason in rec.explanation[:3] %}
+                                    <small class="reason-tag">{{ reason }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </a>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
+</div>
+{% endblock %}

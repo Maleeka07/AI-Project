@@ -1,0 +1,142 @@
+{% extends 'base.html' %}
+
+{% block title %}AI Powered Movie Recommendation - Discover Your Next Favorite Movie{% endblock %}
+
+{% block content %}
+
+<!-- Hero Section -->
+<section class="hero">
+    <div class="container">
+
+        <form class="search-form" action="{{ url_for('main.search_results') }}" method="GET" autocomplete="off">
+            <div class="search-wrapper">
+                <span class="search-icon">🔍</span>
+                <input type="text" name="q" id="searchInput" class="search-input" placeholder="Search movies... (e.g. Avengers, Inception)">
+                <select name="year" id="searchYear" class="search-select">
+                    <option value="">All Years</option>
+                    {% for y in range(2025, 1950, -1) %}
+                        <option value="{{ y }}">{{ y }}</option>
+                    {% endfor %}
+                </select>
+                <button type="submit" class="search-btn">Search</button>
+                <div class="autocomplete-dropdown" id="autocompleteDropdown"></div>
+            </div>
+        </form>
+        {% if online %}
+            <span class="status-badge online">🟢 Online Mode — TMDB Connected</span>
+        {% else %}
+            <span class="status-badge offline">⚫ Offline Mode — Using Local Database</span>
+        {% endif %}
+    </div>
+</section>
+
+<!-- Mood Section -->
+<section class="section">
+    <div class="container">
+        <h2 class="section-title">How are you feeling today?</h2>
+        <div class="mood-buttons">
+            {% for mood in moods %}
+                <button class="mood-btn" data-mood="{{ mood.name }}" onclick="loadMoodMovies('{{ mood.name }}')">
+                    <span class="mood-emoji">{{ mood.emoji }}</span>
+                    <span>{{ mood.label }}</span>
+                </button>
+            {% endfor %}
+        </div>
+        <div id="moodResults" class="movie-grid" style="margin-top: 1.5rem;"></div>
+    </div>
+</section>
+
+<!-- Recommended For You -->
+{% if personalized and personalized|length > 0 %}
+<section class="section">
+    <div class="container">
+        <h2 class="section-title">Recommended For You</h2>
+        <div class="movie-grid">
+            {% for movie in personalized[:8] %}
+                <a href="{{ url_for('main.movie_detail', movie_id=movie.id) }}?source={{ movie.source|default('local') }}" class="movie-card">
+                    <div class="movie-poster">
+                        {% if movie.poster_path %}
+                            {% if movie.poster_path.startswith('http') %}
+                                <img src="{{ movie.poster_path }}" alt="{{ movie.title }}" loading="lazy">
+                            {% else %}
+                                <img src="{{ url_for('static', filename=movie.poster_path.replace('static/', '').replace('/static/', '')) }}" alt="{{ movie.title }}" loading="lazy">
+                            {% endif %}
+                        {% else %}
+                            <div class="poster-placeholder">🎬</div>
+                        {% endif %}
+                        <div class="rating-badge">⭐ {{ movie.rating }}</div>
+                    </div>
+                    <div class="movie-info">
+                        <h3 class="movie-title">{{ movie.title }}</h3>
+                        <p class="movie-year">{{ movie.release_date[:4] if movie.release_date else '' }}</p>
+                    </div>
+                </a>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Trending Movies -->
+{% if trending and trending|length > 0 %}
+<section class="section">
+    <div class="container">
+        <h2 class="section-title">Trending Movies</h2>
+        <div class="movie-grid">
+            {% for movie in trending[:8] %}
+                <a href="{{ url_for('main.movie_detail', movie_id=movie.id) }}?source={{ movie.source|default('local') }}" class="movie-card">
+                    <div class="movie-poster">
+                        {% if movie.poster_path %}
+                            {% if movie.poster_path.startswith('http') %}
+                                <img src="{{ movie.poster_path }}" alt="{{ movie.title }}" loading="lazy">
+                            {% else %}
+                                <img src="{{ url_for('static', filename=movie.poster_path.replace('static/', '').replace('/static/', '')) }}" alt="{{ movie.title }}" loading="lazy">
+                            {% endif %}
+                        {% else %}
+                            <div class="poster-placeholder">🎬</div>
+                        {% endif %}
+                        <div class="rating-badge">⭐ {{ movie.rating }}</div>
+                    </div>
+                    <div class="movie-info">
+                        <h3 class="movie-title">{{ movie.title }}</h3>
+                        <p class="movie-year">{{ movie.release_date[:4] if movie.release_date else '' }}</p>
+                    </div>
+                </a>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Popular Movies -->
+{% if popular and popular|length > 0 %}
+<section class="section">
+    <div class="container">
+        <h2 class="section-title">Popular Movies</h2>
+        <div class="movie-grid">
+            {% for movie in popular[:8] %}
+                <a href="{{ url_for('main.movie_detail', movie_id=movie.id) }}?source={{ movie.source|default('local') }}" class="movie-card">
+                    <div class="movie-poster">
+                        {% if movie.poster_path %}
+                            {% if movie.poster_path.startswith('http') %}
+                                <img src="{{ movie.poster_path }}" alt="{{ movie.title }}" loading="lazy">
+                            {% else %}
+                                <img src="{{ url_for('static', filename=movie.poster_path.replace('static/', '').replace('/static/', '')) }}" alt="{{ movie.title }}" loading="lazy">
+                            {% endif %}
+                        {% else %}
+                            <div class="poster-placeholder">🎬</div>
+                        {% endif %}
+                        <div class="rating-badge">⭐ {{ movie.rating }}</div>
+                    </div>
+                    <div class="movie-info">
+                        <h3 class="movie-title">{{ movie.title }}</h3>
+                        <p class="movie-year">{{ movie.release_date[:4] if movie.release_date else '' }}</p>
+                    </div>
+                </a>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+{% endblock %}

@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+
+{% block title %}Search: {{ query }} — AI Powered Movie Recommendation{% endblock %}
+
+{% block content %}
+<div class="container">
+    <section class="section">
+        <div style="margin-bottom: 2rem;">
+            <form class="search-form" action="{{ url_for('main.search_results') }}" method="GET" autocomplete="off" style="margin:0;">
+                <div class="search-wrapper">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" name="q" id="searchInput" class="search-input" value="{{ query }}" placeholder="Search movies... (e.g. Avengers, Inception)">
+                    <select name="year" id="searchYear" class="search-select">
+                        <option value="">All Years</option>
+                        {% for y in range(2025, 1950, -1) %}
+                            <option value="{{ y }}" {% if request.args.get('year') == y|string %}selected{% endif %}>{{ y }}</option>
+                        {% endfor %}
+                    </select>
+                    <button type="submit" class="search-btn">Search</button>
+                    <div class="autocomplete-dropdown" id="autocompleteDropdown"></div>
+                </div>
+            </form>
+        </div>
+        
+        {% if query %}
+            <h2 class="section-title">Search Results for "{{ query }}"</h2>
+            {% if results %}
+                <p class="results-count">{{ results|length }} movie(s) found</p>
+                <div class="movie-grid">
+                    {% for movie in results %}
+                        <a href="{{ url_for('main.movie_detail', movie_id=movie.id) }}?source={{ movie.source|default('local') }}" class="movie-card">
+                            <div class="movie-poster">
+                                {% if movie.poster_path %}
+                                    {% if movie.poster_path.startswith('http') %}
+                                        <img src="{{ movie.poster_path }}" alt="{{ movie.title }}" loading="lazy">
+                                    {% else %}
+                                        <img src="{{ url_for('static', filename=movie.poster_path.replace('static/', '').replace('/static/', '')) }}" alt="{{ movie.title }}" loading="lazy">
+                                    {% endif %}
+                                {% else %}
+                                    <div class="poster-placeholder">🎬</div>
+                                {% endif %}
+                                <div class="rating-badge">⭐ {{ movie.rating }}</div>
+                            </div>
+                            <div class="movie-info">
+                                <h3 class="movie-title">{{ movie.title }}</h3>
+                                <p class="movie-year">{{ movie.release_date[:4] if movie.release_date else '' }}</p>
+                            </div>
+                        </a>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="empty-state">
+                    <span class="empty-icon">🎬</span>
+                    <h3>No movies found</h3>
+                    <p>Try a different search term or check your spelling.</p>
+                    <a href="{{ url_for('main.index') }}" class="btn btn-accent">Back to Home</a>
+                </div>
+            {% endif %}
+        {% else %}
+            <div class="empty-state">
+                <span class="empty-icon">🔍</span>
+                <h3>Enter a search term</h3>
+                <p>Use the search bar to find movies.</p>
+            </div>
+        {% endif %}
+    </section>
+</div>
+{% endblock %}
