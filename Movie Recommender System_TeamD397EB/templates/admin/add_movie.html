@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ 'Edit' if movie else 'Add' }} Movie — MovieAI Admin{% endblock %}
+
+{% block content %}
+<div class="container">
+    <section class="section">
+        <h1 class="page-title">{{ 'Edit Movie' if movie else 'Add New Movie' }}</h1>
+
+        <form class="movie-form" method="POST"
+              action="{{ url_for('admin.edit_movie', movie_id=movie.id) if movie else url_for('admin.add_movie') }}">
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="title">Movie Title *</label>
+                    <input type="text" id="title" name="title" value="{{ movie.title if movie else '' }}" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="release_date">Release Date</label>
+                    <input type="text" id="release_date" name="release_date" placeholder="YYYY-MM-DD"
+                           value="{{ movie.release_date if movie else '' }}">
+                </div>
+
+                <div class="form-group">
+                    <label for="runtime">Runtime (minutes)</label>
+                    <input type="number" id="runtime" name="runtime" value="{{ movie.runtime if movie else '' }}">
+                </div>
+
+                <div class="form-group">
+                    <label for="rating">Rating (0-10)</label>
+                    <input type="number" id="rating" name="rating" step="0.1" min="0" max="10"
+                           value="{{ movie.rating if movie else '' }}">
+                </div>
+
+                <div class="form-group">
+                    <label for="language">Language</label>
+                    <input type="text" id="language" name="language" value="{{ movie.language if movie else 'en' }}">
+                </div>
+
+                <div class="form-group">
+                    <label for="popularity">Popularity Score</label>
+                    <input type="number" id="popularity" name="popularity" step="0.1"
+                           value="{{ movie.popularity if movie else '' }}">
+                </div>
+
+                <div class="form-group">
+                    <label for="director">Director</label>
+                    <input type="text" id="director" name="director" value="{{ movie.director if movie else '' }}">
+                </div>
+
+                <div class="form-group">
+                    <label for="production_company">Production Company</label>
+                    <input type="text" id="production_company" name="production_company"
+                           value="{{ movie.production_company if movie else '' }}">
+                </div>
+
+                <div class="form-group full-width">
+                    <label for="genres">Genres (comma separated)</label>
+                    <input type="text" id="genres" name="genres" placeholder="Action, Drama, Sci-Fi"
+                           value="{{ movie.genres_str if movie and movie.genres_str else '' }}">
+                </div>
+
+                <div class="form-group full-width">
+                    <label for="cast">Cast (comma separated)</label>
+                    <input type="text" id="cast" name="cast" placeholder="Actor 1, Actor 2"
+                           value="{{ movie.cast_str if movie and movie.cast_str else '' }}">
+                </div>
+
+                <div class="form-group full-width">
+                    <label for="poster_path">Poster URL</label>
+                    <input type="text" id="poster_path" name="poster_path" placeholder="https://..."
+                           value="{{ movie.poster_path if movie else '' }}">
+                </div>
+
+                <div class="form-group full-width">
+                    <label for="trailer_link">Trailer URL (YouTube)</label>
+                    <input type="text" id="trailer_link" name="trailer_link" placeholder="https://www.youtube.com/watch?v=..."
+                           value="{{ movie.trailer_link if movie else '' }}">
+                </div>
+
+                <div class="form-group full-width">
+                    <label for="keywords">Keywords (comma separated)</label>
+                    <input type="text" id="keywords" name="keywords" placeholder="action, hero, space"
+                           value="{{ movie.keywords if movie else '' }}">
+                </div>
+
+                <div class="form-group full-width">
+                    <label for="overview">Overview</label>
+                    <textarea id="overview" name="overview" rows="4" placeholder="Movie description...">{{ movie.overview if movie else '' }}</textarea>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-accent">{{ 'Update Movie' if movie else 'Add Movie' }}</button>
+                <a href="{{ url_for('admin.movies_list') }}" class="btn btn-outline">Cancel</a>
+            </div>
+        </form>
+    </section>
+</div>
+{% endblock %}
