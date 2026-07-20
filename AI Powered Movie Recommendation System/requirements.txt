@@ -1,7 +1,0 @@
-flask
-mysql-connector-python
-scikit-learn
-pandas
-numpy
-rapidfuzz
-requests
